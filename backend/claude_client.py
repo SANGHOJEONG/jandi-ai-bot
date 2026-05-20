@@ -1,21 +1,23 @@
 import os
 from google import genai
+from google.genai import errors
 from dotenv import load_dotenv
-from backend.ppt_reader import extract_text_from_ppt
 
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# PPT 매뉴얼 텍스트 추출
+# 마크다운 매뉴얼 텍스트 로딩
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PPT_PATH = os.path.join(BASE_DIR, "docs", "manual1.pptx")
+MANUAL_PATH = os.path.join(BASE_DIR, "docs", "manual.md")
 
 try:
-    manual_content = extract_text_from_ppt(PPT_PATH)
+    with open(MANUAL_PATH, "r", encoding="utf-8") as f:
+        manual_content = f.read()
+    print(f"매뉴얼 로딩 완료 ({len(manual_content)}자)")
 except Exception as e:
     manual_content = "매뉴얼 파일을 불러올 수 없습니다."
-    print(f"PPT 로딩 오류: {e}")
+    print(f"매뉴얼 로딩 오류: {e}")
 
 def ask_claude(question: str) -> str:
     prompt = f"""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
@@ -33,8 +35,15 @@ def ask_claude(question: str) -> str:
 [질문]
 {question}"""
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    return response.text
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return response.text
+    except errors.APIError as e:
+        print(f"Gemini API 오류: {e}")
+        return "현재 AI 서버에 트래픽이 몰려 답변을 생성할 수 없습니다. 잠시 후 다시 질문해 주세요."
+    except Exception as e:
+        print(f"알 수 없는 오류: {e}")
+        return "답변을 처리하는 중 시스템 오류가 발생했습니다."
