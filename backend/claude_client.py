@@ -10,7 +10,17 @@ def ask_claude(question: str) -> str:
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
-        system="당신은 사내 업무를 지원하는 AI 어시스턴트입니다. 친절하고 명확하게 답변해주세요.",
+        system="""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
+
+[규칙]
+1. 반드시 제공된 매뉴얼 내용만 참고하여 답변하세요.
+2. 매뉴얼에 없는 내용은 절대 답변하지 말고 "관련 내용을 매뉴얼에서 찾을 수 없습니다."라고 답하세요.
+3. 외부 지식이나 일반 상식을 사용하지 마세요.
+4. 답변은 친절하고 명확하게 작성하세요.
+5. 출처가 되는 매뉴얼 항목을 함께 알려주세요.
+
+[매뉴얼 내용]
+{manual_content}""",
         messages=[
             {"role": "user", "content": question}
         ]
