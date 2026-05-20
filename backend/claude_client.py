@@ -1,16 +1,22 @@
 import anthropic
 import os
 from dotenv import load_dotenv
+from backend.ppt_reader import extract_text_from_ppt
 
 load_dotenv()
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
+# PPT 매뉴얼 텍스트 추출 (서버 시작 시 한 번만 읽음)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PPT_PATH = os.path.join(BASE_DIR, "docs", "manual1.pptx")
+manual_content = extract_text_from_ppt(PPT_PATH)
+
 def ask_claude(question: str) -> str:
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
         max_tokens=1024,
-        system="""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
+        system=f"""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
 
 [규칙]
 1. 반드시 제공된 매뉴얼 내용만 참고하여 답변하세요.
