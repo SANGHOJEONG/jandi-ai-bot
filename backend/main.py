@@ -1,5 +1,3 @@
-from email.mime import text
-
 from fastapi import FastAPI, Request
 from backend.claude_client import ask_claude
 from backend.jandi_client import send_to_jandi
@@ -23,7 +21,7 @@ async def jandi_webhook(request: Request):
     if not question:
         return {"status": "no question"}
     
-    # Claude에게 질문
+    # Gemini에게 질문
     answer = ask_claude(question)
     
     # JANDI로 답변 전송
