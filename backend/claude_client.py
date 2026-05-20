@@ -1,17 +1,21 @@
-import google.generativeai as genai
 import os
+from google import genai
 from dotenv import load_dotenv
 from backend.ppt_reader import extract_text_from_ppt
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash-latest")
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-# PPT 매뉴얼 텍스트 추출 (서버 시작 시 한 번만 읽음)
+# PPT 매뉴얼 텍스트 추출
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PPT_PATH = os.path.join(BASE_DIR, "docs", "manual1.pptx")
-manual_content = extract_text_from_ppt(PPT_PATH)
+
+try:
+    manual_content = extract_text_from_ppt(PPT_PATH)
+except Exception as e:
+    manual_content = "매뉴얼 파일을 불러올 수 없습니다."
+    print(f"PPT 로딩 오류: {e}")
 
 def ask_claude(question: str) -> str:
     prompt = f"""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
@@ -29,5 +33,8 @@ def ask_claude(question: str) -> str:
 [질문]
 {question}"""
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-preview-05-20",
+        contents=prompt
+    )
     return response.text
