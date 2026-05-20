@@ -1,3 +1,5 @@
+from email.mime import text
+
 from fastapi import FastAPI, Request
 from backend.claude_client import ask_claude
 from backend.jandi_client import send_to_jandi
@@ -15,8 +17,8 @@ async def jandi_webhook(request: Request):
     # 메시지 추출
     text = data.get("text", "")
     
-    # 키워드 제거 (/AI 또는 @AI)
-    question = text.replace("/AI", "").replace("@AI", "").strip()
+    # 키워드 제거
+    question = text.replace("/이커머스매뉴얼", "").replace("/AI", "").replace("@AI", "").strip()
     
     if not question:
         return {"status": "no question"}
