@@ -1,5 +1,6 @@
 fastapi
 uvicorn
 requests
-anthropic
+google-generativeai
 python-dotenv
+python-pptx
