@@ -34,7 +34,7 @@ def ask_claude(question: str) -> str:
 {question}"""
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash-preview-05-20",
+        model="gemini-1.5-flash-latest",
         contents=prompt
     )
     return response.text
