@@ -1,4 +1,5 @@
 import os
+import time
 from google import genai
 from google.genai import errors
 from dotenv import load_dotenv
@@ -35,15 +36,22 @@ def ask_claude(question: str) -> str:
 [질문]
 {question}"""
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
-        return response.text
-    except errors.APIError as e:
-        print(f"Gemini API 오류: {e}")
-        return "현재 AI 서버에 트래픽이 몰려 답변을 생성할 수 없습니다. 잠시 후 다시 질문해 주세요."
-    except Exception as e:
-        print(f"알 수 없는 오류: {e}")
-        return "답변을 처리하는 중 시스템 오류가 발생했습니다."
+    models_to_try = [
+        "gemini-2.5-flash-lite",
+        "gemini-flash-latest",
+        "gemini-2.5-flash"
+    ]
+
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            print(f"{model_name} 실패: {e}")
+            time.sleep(2)
+            continue
+
+    return "현재 AI 서버에 트래픽이 몰려 답변을 생성할 수 없습니다. 잠시 후 다시 질문해 주세요."
