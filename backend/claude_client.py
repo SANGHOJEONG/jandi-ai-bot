@@ -1,10 +1,12 @@
 import os
-from groq import Groq
+import time
+from google import genai
+from google.genai import errors
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # 마크다운 매뉴얼 텍스트 로딩
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,13 +21,7 @@ except Exception as e:
     print(f"매뉴얼 로딩 오류: {e}")
 
 def ask_claude(question: str) -> str:
-    try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
+    prompt = f"""당신은 백화점 직원을 위한 업무 매뉴얼 Q&A 어시스턴트입니다.
 
 [규칙]
 1. 반드시 제공된 매뉴얼 내용만 참고하여 답변하세요.
@@ -36,16 +32,31 @@ def ask_claude(question: str) -> str:
 6. 답변은 반드시 한국어로 작성하세요.
 
 [매뉴얼 내용]
-{manual_content}"""
-                },
-                {
-                    "role": "user",
-                    "content": question
-                }
-            ],
-            max_tokens=1024
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        print(f"Groq API 오류: {e}")
-        return "답변을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 질문해 주세요."
+{manual_content}
+
+[질문]
+{question}"""
+
+    models_to_try = [
+        "gemini-3.1-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-flash-latest"
+    ]
+
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt
+            )
+            return response.text
+        except errors.APIError as e:
+            print(f"{model_name} 실패: {e}")
+            time.sleep(2)
+            continue
+        except Exception as e:
+            print(f"{model_name} 알 수 없는 오류: {e}")
+            time.sleep(2)
+            continue
+
+    return "현재 AI 서버에 트래픽이 몰려 답변을 생성할 수 없습니다. 잠시 후 다시 질문해 주세요."

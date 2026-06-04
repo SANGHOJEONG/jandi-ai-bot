@@ -1,6 +1,6 @@
 fastapi
 uvicorn
 requests
-groq
+google-genai
 python-dotenv
 python-pptx
