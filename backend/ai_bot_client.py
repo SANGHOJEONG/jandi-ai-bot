@@ -6,15 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ==========================================
-# [수정된 부분] 0원짜리 AI Studio 바구니 대신, 
-# 15,612원의 잔액이 있는 Google Cloud 프로젝트를 직접 바라보게 설정합니다.
-# ==========================================
-client = genai.Client(
-    vertexai=True,                # Google Cloud(Vertex AI) 모드를 켭니다.
-    project="jandi-ai-bot",       # 잔액이 연동된 구글 클라우드 프로젝트 ID를 입력합니다.
-    location="us-central01"       # 모델이 구동될 지역(기본값 us-central01)을 지정합니다.
-)
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # 마크다운 매뉴얼 텍스트 로딩
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -45,7 +37,6 @@ def ask_claude(question: str) -> str:
 [질문]
 {question}"""
 
-    # 작성하신 최신 모델 목록을 그대로 사용합니다.
     models_to_try = [
         "gemini-3.1-flash-lite",
         "gemini-3.5-flash",
