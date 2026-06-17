@@ -30,7 +30,7 @@ def extract_text_from_image(image_path: str) -> str:
     """Gemini Vision으로 이미지에서 텍스트 추출"""
     image = Image.open(image_path)
     
-    models_to_try = ["gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"]
+    models_to_try = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"]
     
     for model_name in models_to_try:
         try:
@@ -112,6 +112,6 @@ def convert_ppt_to_markdown(ppt_path: str, output_md: str):
 
 if __name__ == "__main__":
     convert_ppt_to_markdown(
-        ppt_path="docs/manual1.pptx",
+        ppt_path="docs/manual2.pptx",
         output_md="docs/manual.md"
     )
