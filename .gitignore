@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+docs/*.pptx
+temp_slides/
+temp_progress/
